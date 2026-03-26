@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}ShopSite — Create Your Shop Website Free{% endblock %}
+{% block meta_description %}Fill in a few details and get a beautiful, shareable website for your shop in under 2 minutes. Free, no code, instant.{% endblock %}
+{% set active_page = "home" %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════
+     HERO — dark, full-viewport
+═══════════════════════════════════════ -->
+<section class="pg-hero" id="hero">
+  <div class="pg-hero__bg">
+    <div class="pg-hero__orb pg-hero__orb--1"></div>
+    <div class="pg-hero__orb pg-hero__orb--2"></div>
+    <div class="pg-hero__noise"></div>
+  </div>
+
+  <div class="pg-hero__body">
+    <span class="badge reveal">
+      <span class="badge__dot"></span>
+      Free &nbsp;·&nbsp; No code &nbsp;·&nbsp; Instant
+    </span>
+    <h1 class="pg-hero__title reveal reveal--d1">
+      Your shop,<br><em>online</em> in<br>2 minutes
+    </h1>
+    <p class="pg-hero__sub reveal reveal--d2">
+      Fill in a few details and we'll generate a beautiful, shareable website for your shop — no tech skills needed.
+    </p>
+    <div class="btn-row reveal reveal--d3">
+      <a href="#form" class="btn btn--gold">Get Started Free ✦</a>
+      <a href="{{ url_for('about') }}" class="btn btn--ghost-light">How it works</a>
+    </div>
+    <div class="pg-hero__scroll reveal reveal--d4">
+      <span>Scroll to the form</span>
+      <div class="scroll-line"></div>
+    </div>
+  </div>
+
+  <div class="hero-pills reveal reveal--d4">
+    <div class="hero-pill">⚡ Live in 60 seconds</div>
+    <div class="hero-pill">📱 Mobile-ready</div>
+    <div class="hero-pill">🔗 Shareable link</div>
+    <div class="hero-pill">🆓 Always free</div>
+  </div>
+
+  <div class="section-clip section-clip--cream"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     HOW IT WORKS — cream section
+═══════════════════════════════════════ -->
+<section class="section bg-cream" id="how">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="eyebrow">How It Works</span>
+      <h2 class="section-title">Three steps to your<br>shop's online home</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal" style="--i:0">
+        <div class="step-card__num">01</div>
+        <h3 class="step-card__title">Fill the form</h3>
+        <p class="step-card__body">Enter your shop name, products, contact, and hours. Takes about 60 seconds.</p>
+        <div class="step-card__bar"></div>
+      </div>
+      <div class="step-card reveal" style="--i:1">
+        <div class="step-card__num">02</div>
+        <h3 class="step-card__title">We generate it</h3>
+        <p class="step-card__body">ShopSite instantly builds a premium, professional page tailored to your information.</p>
+        <div class="step-card__bar"></div>
+      </div>
+      <div class="step-card reveal" style="--i:2">
+        <div class="step-card__num">03</div>
+        <h3 class="step-card__title">Share it anywhere</h3>
+        <p class="step-card__body">Copy your unique link and share it on WhatsApp, Instagram, Google Maps, or anywhere.</p>
+        <div class="step-card__bar"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     FORM — dark section
+═══════════════════════════════════════ -->
+<section class="section bg-dark form-section-wrap" id="form">
+  <div class="section-clip section-clip--dark section-clip--top"></div>
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="eyebrow eyebrow--light">Build Your Page</span>
+      <h2 class="section-title section-title--light">Create your shop website</h2>
+      <p class="section-sub section-sub--light">
+        All fields marked <span style="color:var(--gold-light)">*</span> are required.
+      </p>
+    </div>
+
+    {% if errors %}
+    <div class="error-box reveal" role="alert">
+      <p class="error-box__title">⚠ Please fix the following:</p>
+      <ul>{% for err in errors %}<li>{{ err }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+
+    <div class="form-card reveal">
+      <form action="/generate" method="POST" novalidate id="shopForm">
+
+        <div class="form-section">
+          <p class="form-section__label">Basic Information</p>
+          <div class="field-row">
+            <div class="field">
+              <label for="shop_name">Shop Name <span class="req">*</span></label>
+              <input type="text" id="shop_name" name="shop_name"
+                placeholder="e.g. Sam's Grocery" maxlength="80"
+                value="{{ form_data.shop_name if form_data else '' }}" required />
+            </div>
+            <div class="field">
+              <label for="category">Category</label>
+              <select id="category" name="category">
+                {% set cats = [
+                  ('', 'Select a category…'),
+                  ('grocery', '🛒 Grocery'),
+                  ('electronics', '💡 Electronics'),
+                  ('clothing', '👗 Clothing & Fashion'),
+                  ('bakery', '🥐 Bakery & Food'),
+                  ('pharmacy', '💊 Pharmacy & Health'),
+                  ('hardware', '🔧 Hardware & Tools'),
+                  ('stationery', '📚 Books & Stationery'),
+                  ('mobile', '📱 Mobile & Accessories'),
+                  ('salon', '✂️ Salon & Beauty'),
+                  ('other', '🏪 Other'),
+                ] %}
+                {% for val, label in cats %}
+                  <option value="{{ val }}"
+                    {% if form_data and form_data.category == val %}selected{% endif %}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="description">Description
+              <span class="hint">(What makes your shop special?)</span>
+            </label>
+            <textarea id="description" name="description" rows="3"
+              placeholder="e.g. Family-run grocery store serving fresh produce since 2005.">{{ form_data.description if form_data else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section__label">Products / Services</p>
+          <div class="field">
+            <label for="products">Products or Services
+              <span class="hint">(comma-separated)</span>
+            </label>
+            <textarea id="products" name="products" rows="2"
+              placeholder="e.g. Rice, Wheat Flour, Cooking Oil, Dairy, Fresh Vegetables">{{ form_data.products if form_data else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <p class="form-section__label">Contact & Hours</p>
+          <div class="field-row">
+            <div class="field">
+              <label for="contact">Contact Number <span class="req">*</span></label>
+              <input type="tel" id="contact" name="contact"
+                placeholder="+91 98765 43210"
+                value="{{ form_data.contact if form_data else '' }}" required />
+            </div>
+            <div class="field">
+              <label for="hours">Opening Hours</label>
+              <input type="text" id="hours" name="hours"
+                placeholder="e.g. Mon–Sat: 9 AM – 9 PM"
+                value="{{ form_data.hours if form_data else '' }}" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="address">Address <span class="req">*</span></label>
+            <textarea id="address" name="address" rows="2"
+              placeholder="e.g. 12, Gandhi Nagar, Anna Salai, Chennai – 600002">{{ form_data.address if form_data else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <p class="form-footer__note"><span class="req">*</span> Required fields</p>
+          <button type="submit" class="btn btn--gold btn--lg">✦ Generate My Website</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+  <div class="section-clip section-clip--cream section-clip--bottom"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     FEATURES — cream section
+═══════════════════════════════════════ -->
+<section class="section bg-cream" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="eyebrow">Why ShopSite</span>
+      <h2 class="section-title">Everything a local shop needs</h2>
+    </div>
+    <div class="features-grid">
+      {% set features = [
+        ('⚡', 'Instant', 'Live the moment you submit — no waiting, no approvals, no setup.'),
+        ('🎨', 'Premium Design', 'Hand-crafted luxury aesthetics, not a generic cookie-cutter template.'),
+        ('📱', 'Mobile-First', 'Looks stunning on every device your customers use.'),
+        ('📍', 'Map Integration', 'One-click "View on Map" so customers can find you easily.'),
+        ('📞', 'Direct Call Button', 'Customers can call you directly from your page with a single tap.'),
+        ('🔗', 'Shareable Link', 'A unique URL ready to paste into WhatsApp, Instagram, or Google Maps.'),
+      ] %}
+      {% for icon, title, body in features %}
+      <div class="feature-card reveal" data-index="{{ loop.index0 }}" style="--i: {{ loop.index0 }}">
+        <div class="feature-card__icon">{{ icon }}</div>
+        <h3 class="feature-card__title">{{ title }}</h3>
+        <p class="feature-card__body">{{ body }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     CTA BANNER — dark
+═══════════════════════════════════════ -->
+<section class="cta-banner">
+  <div class="cta-banner__inner reveal">
+    <div>
+      <h2 class="cta-banner__title">Ready to go live?</h2>
+      <p class="cta-banner__sub">It takes less time than brewing a cup of chai.</p>
+    </div>
+    <a href="#form" class="btn btn--gold btn--lg">Create My Shop Site ✦</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.getElementById('shopForm').addEventListener('submit', function(e) {
+    let hasError = false;
+    ['shop_name','contact','address'].forEach(name => {
+      const el = this.querySelector(`[name="${name}"]`);
+      if (!el) return;
+      const empty = !el.value.trim();
+      el.classList.toggle('input--error', empty);
+      if (empty) hasError = true;
+    });
+    if (hasError) {
+      e.preventDefault();
+      document.getElementById('form').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+  document.querySelectorAll('input,textarea').forEach(el =>
+    el.addEventListener('input', () => el.classList.remove('input--error'))
+  );
+</script>
+{% endblock %}

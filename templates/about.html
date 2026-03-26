@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}About — ShopSite{% endblock %}
+{% block meta_description %}ShopSite was built so every local shop owner can have a professional web presence — no code, no cost.{% endblock %}
+{% set active_page = "about" %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════
+     HERO — dark
+═══════════════════════════════════════ -->
+<section class="pg-hero pg-hero--short" id="hero">
+  <div class="pg-hero__bg">
+    <div class="pg-hero__orb pg-hero__orb--1"></div>
+    <div class="pg-hero__noise"></div>
+  </div>
+  <div class="pg-hero__body pg-hero__body--center">
+    <span class="badge reveal"><span class="badge__dot"></span>Our Story</span>
+    <h1 class="pg-hero__title reveal reveal--d1">
+      Built for the<br><em>local shop owner</em>
+    </h1>
+    <p class="pg-hero__sub reveal reveal--d2">
+      ShopSite was born from a simple belief: every neighbourhood shop deserves a presence online — without the hassle, cost, or technical headache.
+    </p>
+  </div>
+  <div class="section-clip section-clip--cream"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     MISSION — cream section
+═══════════════════════════════════════ -->
+<section class="section bg-cream">
+  <div class="container">
+    <div class="two-col two-col--vcenter">
+
+      <div class="two-col__text reveal">
+        <span class="eyebrow">What We Do</span>
+        <h2 class="section-title" style="text-align:left;">A website in under<br>2 minutes</h2>
+        <p class="body-text">
+          ShopSite lets any shop owner — from a corner grocery to a neighbourhood salon — generate a clean, professional web page by simply filling out a form. No design skills, no developers, no monthly fees.
+        </p>
+        <p class="body-text">
+          We create a unique URL for your shop, complete with your products, opening hours, contact details, and address — beautifully presented and ready to share with customers.
+        </p>
+        <div class="btn-row" style="margin-top:1.8rem;">
+          <a href="{{ url_for('index') }}#form" class="btn btn--gold">Create Your Site →</a>
+          <a href="{{ url_for('contact') }}" class="btn btn--ghost">Get in touch</a>
+        </div>
+      </div>
+
+      <div class="about-visual reveal reveal--d1">
+        <div class="about-card-big">
+          <div class="about-card-big__letter">S</div>
+          <p class="about-card-big__name">ShopSite</p>
+          <p class="about-card-big__sub">For local businesses</p>
+        </div>
+        <div class="float-tag float-tag--1">⭐ Trusted by locals</div>
+        <div class="float-tag float-tag--2">🛒 Quality assured</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     VALUES — dark section
+═══════════════════════════════════════ -->
+<section class="section bg-dark">
+  <div class="section-clip section-clip--dark section-clip--top"></div>
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="eyebrow eyebrow--light">What We Stand For</span>
+      <h2 class="section-title section-title--light">Our values</h2>
+    </div>
+    <div class="values-grid">
+      {% set values = [
+        ('⚡', 'Instant', 'Your site is live the moment you hit Generate. No waiting, no approvals.'),
+        ('🎨', 'Beautiful', 'Every page uses a premium, hand-crafted design — not a generic template.'),
+        ('📱', 'Mobile-first', 'Looks great on every device — phones, tablets, and desktops alike.'),
+        ('🔗', 'Shareable', 'Get a link you can paste into WhatsApp, Instagram bios, or Google Maps.'),
+      ] %}
+      {% for icon, title, body in values %}
+      <div class="value-card reveal" style="--i: {{ loop.index0 }};">
+        <div class="value-card__icon">{{ icon }}</div>
+        <h3 class="value-card__title">{{ title }}</h3>
+        <p class="value-card__body">{{ body }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="section-clip section-clip--cream section-clip--bottom"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     TEAM / ORIGIN — cream section
+═══════════════════════════════════════ -->
+<section class="section bg-cream">
+  <div class="container">
+    <div class="origin-block reveal">
+      <span class="eyebrow">The Origin</span>
+      <h2 class="section-title" style="text-align:left;max-width:560px;">
+        Started in Chennai,<br>built for India
+      </h2>
+      <p class="body-text">
+        We noticed that millions of small shop owners across India had no affordable way to put their business online. Existing platforms were either too expensive, too complex, or produced generic results that didn't reflect the character of local shops.
+      </p>
+      <p class="body-text">
+        ShopSite is the answer to that gap — a tool built with love for local businesses, designed to take less time than a WhatsApp message to set up.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     CTA BANNER
+═══════════════════════════════════════ -->
+<section class="cta-banner">
+  <div class="cta-banner__inner reveal">
+    <div>
+      <h2 class="cta-banner__title">Ready to go live?</h2>
+      <p class="cta-banner__sub">It takes less time than brewing your morning chai.</p>
+    </div>
+    <a href="{{ url_for('index') }}#form" class="btn btn--gold btn--lg">Create My Shop Site ✦</a>
+  </div>
+</section>
+
+{% endblock %}

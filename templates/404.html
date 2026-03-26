@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}404 — ShopSite{% endblock %}
+{% set active_page = "" %}
+
+{% block content %}
+<section class="pg-hero pg-hero--short pg-hero--center" id="hero">
+  <div class="pg-hero__bg">
+    <div class="pg-hero__orb pg-hero__orb--1"></div>
+    <div class="pg-hero__noise"></div>
+  </div>
+  <div class="pg-hero__body pg-hero__body--center">
+    <div class="not-found__code reveal">404</div>
+    <h1 class="pg-hero__title pg-hero__title--sm reveal reveal--d1">Page not found</h1>
+    <p class="pg-hero__sub reveal reveal--d2">
+      This shop page doesn't exist or the server was restarted.
+    </p>
+    <div class="btn-row btn-row--center reveal reveal--d3">
+      <a href="{{ url_for('index') }}" class="btn btn--gold">← Create a New Site</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

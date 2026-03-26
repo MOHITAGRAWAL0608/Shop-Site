@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<!--
+  base.html — ShopSite base template
+  All pages extend this. Provides: navbar, fonts, CSS link, footer, JS scaffold.
+  Blocks: title, meta_description, extra_head, body_class, content, extra_js
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ShopSite{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Create a beautiful website for your shop in under 2 minutes — free, no code, instant.{% endblock %}" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+  <!-- ══════════════════════════════════════════════════════
+       GLOBAL NAVBAR
+  ══════════════════════════════════════════════════════ -->
+  <header class="site-nav" id="siteNav">
+    <div class="site-nav__inner">
+
+      <!-- Logo — always left -->
+      <a href="{{ url_for('index') }}" class="site-nav__logo">
+        <span class="site-nav__logo-dot"></span>
+        Shop<span class="site-nav__logo-accent">Site</span>
+      </a>
+
+      <!-- Mobile burger -->
+      <button class="site-nav__burger" id="siteNavBurger"
+              aria-label="Toggle navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Links — always right -->
+      <nav class="site-nav__links" id="siteNavLinks" role="navigation">
+        <a href="{{ url_for('index') }}"
+           class="site-nav__link{% if active_page == 'home' %} site-nav__link--active{% endif %}">
+          Home
+        </a>
+        <a href="{{ url_for('about') }}"
+           class="site-nav__link{% if active_page == 'about' %} site-nav__link--active{% endif %}">
+          About
+        </a>
+        <a href="{{ url_for('contact') }}"
+           class="site-nav__link{% if active_page == 'contact' %} site-nav__link--active{% endif %}">
+          Contact Us
+        </a>
+        <a href="{{ url_for('index') }}" class="site-nav__cta">
+          Create a Site ✦
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════
+       PAGE CONTENT
+  ══════════════════════════════════════════════════════ -->
+  <main id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ══════════════════════════════════════════════════════
+       GLOBAL FOOTER
+  ══════════════════════════════════════════════════════ -->
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div class="site-footer__brand">
+        <span class="site-footer__brand-dot"></span>
+        Shop<span>Site</span>
+      </div>
+      <p class="site-footer__copy">
+        © 2025 ShopSite &nbsp;·&nbsp; Built for local businesses everywhere
+      </p>
+      <nav class="site-footer__nav">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('about') }}">About</a>
+        <a href="{{ url_for('contact') }}">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ══════════════════════════════════════════════════════
+       GLOBAL JS: navbar scroll + mobile menu + reveal
+  ══════════════════════════════════════════════════════ -->
+  <script>
+    /* Navbar scroll behaviour */
+    const siteNav = document.getElementById('siteNav');
+    window.addEventListener('scroll', () => {
+      siteNav.classList.toggle('site-nav--scrolled', window.scrollY > 30);
+    }, { passive: true });
+
+    /* Mobile burger toggle */
+    const burger   = document.getElementById('siteNavBurger');
+    const navPanel = document.getElementById('siteNavLinks');
+    burger.addEventListener('click', () => {
+      const open = navPanel.classList.toggle('site-nav__links--open');
+      burger.setAttribute('aria-expanded', open);
+      burger.classList.toggle('burger--open', open);
+    });
+    navPanel.querySelectorAll('a').forEach(a =>
+      a.addEventListener('click', () => {
+        navPanel.classList.remove('site-nav__links--open');
+        burger.classList.remove('burger--open');
+        burger.setAttribute('aria-expanded', false);
+      })
+    );
+
+    /* Scroll-reveal (IntersectionObserver) */
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('revealed');
+          revealObserver.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* Smooth scroll for anchor links */
+    document.querySelectorAll('a[href^="#"]').forEach(a =>
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+      })
+    );
+
+    /* Toast helper (used on shop pages) */
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      if (msg) t.textContent = msg;
+      t.classList.add('toast--show');
+      setTimeout(() => t.classList.remove('toast--show'), 2600);
+    }
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
