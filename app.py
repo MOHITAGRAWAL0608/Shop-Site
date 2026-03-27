@@ -48,6 +48,18 @@ def about():
 def contact():
     return render_template("contact.html", active_page="contact")
 
+@app.route("/submit-contact", methods=["POST"])
+def submit_contact():
+    name = request.form.get("name")
+    email = request.form.get("email")
+    subject = request.form.get("subject")
+    message = request.form.get("message")
+
+    print("New Contact Message:")
+    print(name, email, subject, message)
+
+    return {"status": "success"}
+
 
 # ---------------------------------------------------------------------------
 # Route: /generate (POST) → validate inputs, store data, redirect to site
