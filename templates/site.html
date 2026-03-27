@@ -1,108 +1,205 @@
 {% extends "base.html" %}
 
-{% block title %}Contact Us — ShopSite{% endblock %}
-{% block meta_description %}Have a question or feature request? We'd love to hear from you.{% endblock %}
-{% set active_page = "contact" %}
+{% block title %}{{ shop.shop_name }} — ShopSite{% endblock %}
+{% block meta_description %}{{ shop.description or (shop.shop_name ~ ' — ' ~ shop.category ~ ' shop. Contact: ' ~ shop.contact) }}{% endblock %}
+{% set active_page = "" %}
+
+{% block extra_head %}
+<style>
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 1.5rem; left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: var(--ink); color: #fff;
+    padding: .65rem 1.4rem; border-radius: 2rem;
+    font-size: .82rem; font-family: var(--font-body);
+    z-index: 9999; white-space: nowrap; pointer-events: none;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .toast--show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Shop Hero ── */
+  .shop-hero {
+    background: var(--ink); color: #fff;
+    padding: 6rem 0 4rem; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .shop-hero__bg { position: absolute; inset: 0; z-index: 0; }
+  .shop-hero__orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); opacity: .18;
+  }
+  .shop-hero__orb--1 { width: 480px; height: 480px; background: var(--gold); top: -120px; right: -100px; }
+  .shop-hero__orb--2 { width: 300px; height: 300px; background: #6c63ff; bottom: -80px; left: -80px; }
+  .shop-hero__body {
+    position: relative; z-index: 1;
+    max-width: 700px; margin: 0 auto; padding: 0 1.5rem;
+  }
+  .shop-category-badge {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+    border-radius: 2rem; padding: .35rem 1rem;
+    font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
+    color: #f4c45e; margin-bottom: 1.2rem;
+  }
+  .shop-hero__name {
+    font-family: var(--font-display, 'Cormorant Garamond', serif);
+    font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 700;
+    line-height: 1.1; margin-bottom: 1rem;
+  }
+  .shop-hero__desc {
+    font-size: 1rem; color: rgba(255,255,255,.7);
+    line-height: 1.7; max-width: 550px; margin: 0 auto 2rem;
+  }
+  .shop-hero__actions { display: flex; gap: .85rem; justify-content: center; flex-wrap: wrap; }
+
+  /* ── Info Cards ── */
+  .shop-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.4rem; margin-top: 2.5rem;
+  }
+  .shop-info-card {
+    background: #fff; border: 1px solid rgba(0,0,0,.07);
+    border-radius: 1rem; padding: 1.5rem;
+    display: flex; gap: 1rem; align-items: flex-start;
+    box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  }
+  .shop-info-card__icon  { font-size: 1.5rem; flex-shrink: 0; margin-top: .1rem; }
+  .shop-info-card__label {
+    font-size: .72rem; letter-spacing: .06em;
+    text-transform: uppercase; color: #888; margin-bottom: .25rem;
+  }
+  .shop-info-card__value { font-size: .95rem; color: var(--ink, #1a1a2e); font-weight: 500; line-height: 1.5; }
+  .shop-info-card__value a { color: inherit; text-decoration: none; }
+  .shop-info-card__value a:hover { text-decoration: underline; }
+
+  /* ── Products ── */
+  .products-grid { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+  .product-chip {
+    background: rgba(255,255,255,.1); color: #fff;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 2rem; padding: .45rem 1.1rem;
+    font-size: .85rem; font-weight: 500;
+    --i: attr(data-index);
+  }
+
+  /* ── Share Bar ── */
+  .share-bar { background: var(--ink); color: #fff; padding: 2.5rem 0; text-align: center; }
+  .share-bar__title {
+    font-size: .85rem; color: rgba(255,255,255,.6);
+    margin-bottom: 1rem; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .share-bar__btns { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+  .btn--wa   { background: #25d366; color: #fff; }
+  .btn--copy { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.25); cursor: pointer; }
+  .btn--map  { background: #4285f4; color: #fff; }
+</style>
+{% endblock %}
 
 {% block content %}
 
 <!-- ═══════════════════════════════════════
-     HERO — dark
+     SHOP HERO — dark
 ═══════════════════════════════════════ -->
-<section class="pg-hero pg-hero--short" id="hero">
-  <div class="pg-hero__bg">
-    <div class="pg-hero__orb pg-hero__orb--1"></div>
-    <div class="pg-hero__noise"></div>
+<section class="shop-hero">
+  <div class="shop-hero__bg">
+    <div class="shop-hero__orb shop-hero__orb--1"></div>
+    <div class="shop-hero__orb shop-hero__orb--2"></div>
   </div>
-  <div class="pg-hero__body pg-hero__body--center">
-    <span class="badge reveal"><span class="badge__dot"></span>Get In Touch</span>
-    <h1 class="pg-hero__title reveal reveal--d1">
-      We'd love to<br><em>hear from you</em>
-    </h1>
-    <p class="pg-hero__sub reveal reveal--d2">
-      Have a question, a feature request, or just want to say hello? Reach out — we're a small team and we actually read every message.
-    </p>
+  <div class="shop-hero__body">
+    <div class="shop-category-badge reveal">
+      <span class="badge__dot"></span>
+      {{ shop.category }}
+    </div>
+    <h1 class="shop-hero__name reveal reveal--d1">{{ shop.shop_name }}</h1>
+    {% if shop.description %}
+    <p class="shop-hero__desc reveal reveal--d2">{{ shop.description }}</p>
+    {% endif %}
+    <div class="shop-hero__actions reveal reveal--d3">
+      <a href="tel:{{ shop.contact }}" class="btn btn--gold">📞 Call Now</a>
+      {% if shop.address %}
+      <a href="https://www.google.com/maps/search/{{ shop.address | urlencode }}"
+         target="_blank" rel="noopener" class="btn btn--ghost-light">📍 View on Map</a>
+      {% endif %}
+    </div>
   </div>
   <div class="section-clip section-clip--cream"></div>
 </section>
 
 
 <!-- ═══════════════════════════════════════
-     CONTACT GRID — cream section
+     SHOP DETAILS — cream section
 ═══════════════════════════════════════ -->
 <section class="section bg-cream">
   <div class="container">
-    <div class="two-col two-col--top">
+    <div class="section-header reveal">
+      <span class="eyebrow">Shop Details</span>
+      <h2 class="section-title">About {{ shop.shop_name }}</h2>
+    </div>
 
-      <!-- Info side -->
-      <div class="contact-info reveal">
-        <span class="eyebrow">Reach Us</span>
-        <h2 class="section-title" style="text-align:left;">Contact<br>Information</h2>
-        <p class="body-text">
-          ShopSite is a small MVP project. For questions about your generated shop page, or to suggest features, use any of the channels below.
-        </p>
-        <div class="contact-info-list">
-          <div class="contact-info-item">
-            <div class="contact-info-item__icon">📧</div>
-            <div>
-              <p class="contact-info-item__label">Email</p>
-              <a href="mailto:hello@shopsite.in" class="contact-info-item__value">hello@shopsite.in</a>
-            </div>
-          </div>
-          <div class="contact-info-item">
-            <div class="contact-info-item__icon">📍</div>
-            <div>
-              <p class="contact-info-item__label">Based in</p>
-              <p class="contact-info-item__value">Chennai, Tamil Nadu, India</p>
-            </div>
-          </div>
-          <div class="contact-info-item">
-            <div class="contact-info-item__icon">🕐</div>
-            <div>
-              <p class="contact-info-item__label">Response time</p>
-              <p class="contact-info-item__value">Usually within 24 hours</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form side -->
-      <div class="reveal reveal--d1">
-        <div class="form-card" style="margin-top:0;">
-          <p class="form-section__label">Send a Message</p>
-
-          <div id="contactSuccess" class="success-banner" style="display:none;">
-            <span>✓</span> Thanks! We'll get back to you soon.
-          </div>
-
-          <div class="field">
-            <label for="c_name">Your Name</label>
-            <input type="text" id="c_name" placeholder="e.g. Priya Rajan" />
-          </div>
-          <div class="field">
-            <label for="c_email">Email Address</label>
-            <input type="email" id="c_email" placeholder="you@example.com" />
-          </div>
-          <div class="field">
-            <label for="c_subject">Subject</label>
-            <input type="text" id="c_subject" placeholder="e.g. Feature request" />
-          </div>
-          <div class="field">
-            <label for="c_message">Message</label>
-            <textarea id="c_message" rows="5" placeholder="Tell us what's on your mind…"></textarea>
-          </div>
-          <div style="margin-top:1.4rem;">
-            <button type="button" class="btn btn--gold btn--lg btn--full" id="contactSubmitBtn">
-              Send Message ✦
-            </button>
-          </div>
-          <p style="font-size:0.72rem;color:var(--muted);margin-top:0.9rem;text-align:center;">
-            This is a demo form — submissions are not stored or sent in the MVP.
+    <div class="shop-info-grid">
+      <div class="shop-info-card reveal">
+        <div class="shop-info-card__icon">📞</div>
+        <div>
+          <p class="shop-info-card__label">Contact</p>
+          <p class="shop-info-card__value">
+            <a href="tel:{{ shop.contact }}">{{ shop.contact }}</a>
           </p>
         </div>
       </div>
-
+      <div class="shop-info-card reveal">
+        <div class="shop-info-card__icon">🕐</div>
+        <div>
+          <p class="shop-info-card__label">Opening Hours</p>
+          <p class="shop-info-card__value">{{ shop.hours }}</p>
+        </div>
+      </div>
+      <div class="shop-info-card reveal">
+        <div class="shop-info-card__icon">📍</div>
+        <div>
+          <p class="shop-info-card__label">Address</p>
+          <p class="shop-info-card__value">{{ shop.address }}</p>
+        </div>
+      </div>
     </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     PRODUCTS / SERVICES — dark section
+═══════════════════════════════════════ -->
+{% if shop.products %}
+<section class="section bg-dark">
+  <div class="section-clip section-clip--dark section-clip--top"></div>
+  <div class="container">
+    <div class="section-header reveal">
+      <span class="eyebrow eyebrow--light">What We Offer</span>
+      <h2 class="section-title section-title--light">Products &amp; Services</h2>
+    </div>
+    <div class="products-grid">
+      {% for product in shop.products %}
+      <span class="product-chip reveal" data-index="{{ loop.index0 }}">{{ product }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="section-clip section-clip--cream section-clip--bottom"></div>
+</section>
+{% endif %}
+
+
+<!-- ═══════════════════════════════════════
+     SHARE BAR
+═══════════════════════════════════════ -->
+<section class="share-bar">
+  <p class="share-bar__title">Share this shop page</p>
+  <div class="share-bar__btns">
+    <a href="https://wa.me/?text={{ ('Check out ' ~ shop.shop_name ~ ': ' ~ request.url) | urlencode }}"
+       target="_blank" rel="noopener" class="btn btn--wa">💬 Share on WhatsApp</a>
+    <button class="btn btn--copy" onclick="copyLink()">🔗 Copy Link</button>
+    <a href="https://www.google.com/maps/search/{{ shop.address | urlencode }}"
+       target="_blank" rel="noopener" class="btn btn--map">🗺 View on Google Maps</a>
   </div>
 </section>
 
@@ -113,35 +210,26 @@
 <section class="cta-banner">
   <div class="cta-banner__inner reveal">
     <div>
-      <h2 class="cta-banner__title">Haven't created your site yet?</h2>
+      <h2 class="cta-banner__title">Want a page like this for your shop?</h2>
       <p class="cta-banner__sub">It's free and takes under 2 minutes.</p>
     </div>
     <a href="{{ url_for('index') }}#form" class="btn btn--gold btn--lg">Create My Shop Site ✦</a>
   </div>
 </section>
 
+<!-- Toast -->
+<div class="toast" id="toast">Link copied!</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  document.getElementById('contactSubmitBtn').addEventListener('click', function() {
-    const name    = document.getElementById('c_name').value.trim();
-    const email   = document.getElementById('c_email').value.trim();
-    const message = document.getElementById('c_message').value.trim();
-    ['c_name','c_email','c_message'].forEach(id => {
-      const el = document.getElementById(id);
-      el.classList.toggle('input--error', !el.value.trim());
+  function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      showToast('Link copied to clipboard!');
+    }).catch(() => {
+      showToast('Copy the URL from your browser bar.');
     });
-    if (!name || !email || !message) return;
-    document.getElementById('contactSuccess').style.display = 'flex';
-    this.disabled = true;
-    this.textContent = '✓ Sent!';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-  ['c_name','c_email','c_message'].forEach(id => {
-    document.getElementById(id).addEventListener('input', function() {
-      this.classList.remove('input--error');
-    });
-  });
+  }
 </script>
 {% endblock %}
