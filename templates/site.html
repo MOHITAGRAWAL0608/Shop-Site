@@ -6,141 +6,610 @@
 
 {% block extra_head %}
 <style>
+
+  /* ══════════════════════════════════════════════════════
+     SHOP PAGE — Extended Design System
+     Inherits all tokens from style.css
+  ══════════════════════════════════════════════════════ */
+
   /* ── Toast ── */
   .toast {
-    position: fixed; bottom: 1.5rem; left: 50%;
-    transform: translateX(-50%) translateY(120%);
-    background: var(--ink); color: #fff;
-    padding: .65rem 1.4rem; border-radius: 2rem;
-    font-size: .82rem; font-family: var(--font-body);
-    z-index: 9999; white-space: nowrap; pointer-events: none;
-    transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+    position: fixed;
+    bottom: 2rem; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--charcoal);
+    color: var(--white);
+    padding: 0.7rem 1.6rem;
+    border-radius: 99px;
+    font-size: 0.85rem; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: var(--shadow-lg);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    white-space: nowrap; z-index: 9999;
   }
-  .toast--show { transform: translateX(-50%) translateY(0); }
+  .toast--show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  /* ── Shop Hero ── */
+
+  /* ══════════════════════════════════════════════════════
+     SHOP HERO — Full-viewport dark cinematic
+  ══════════════════════════════════════════════════════ */
   .shop-hero {
-    background: var(--ink); color: #fff;
-    padding: 6rem 0 4rem; text-align: center;
-    position: relative; overflow: hidden;
+    position: relative;
+    min-height: 100svh;
+    background: var(--charcoal-3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding: 7rem 1.5rem 6rem;
   }
-  .shop-hero__bg { position: absolute; inset: 0; z-index: 0; }
-  .shop-hero__orb {
-    position: absolute; border-radius: 50%;
-    filter: blur(80px); opacity: .18;
-  }
-  .shop-hero__orb--1 { width: 480px; height: 480px; background: var(--gold); top: -120px; right: -100px; }
-  .shop-hero__orb--2 { width: 300px; height: 300px; background: #6c63ff; bottom: -80px; left: -80px; }
-  .shop-hero__body {
-    position: relative; z-index: 1;
-    max-width: 700px; margin: 0 auto; padding: 0 1.5rem;
-  }
-  .shop-category-badge {
-    display: inline-flex; align-items: center; gap: .45rem;
-    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-    border-radius: 2rem; padding: .35rem 1rem;
-    font-size: .78rem; letter-spacing: .08em; text-transform: uppercase;
-    color: #f4c45e; margin-bottom: 1.2rem;
-  }
-  .shop-hero__name {
-    font-family: var(--font-display, 'Cormorant Garamond', serif);
-    font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 700;
-    line-height: 1.1; margin-bottom: 1rem;
-  }
-  .shop-hero__desc {
-    font-size: 1rem; color: rgba(255,255,255,.7);
-    line-height: 1.7; max-width: 550px; margin: 0 auto 2rem;
-  }
-  .shop-hero__actions { display: flex; gap: .85rem; justify-content: center; flex-wrap: wrap; }
 
-  /* ── Info Cards ── */
+  /* Background orbs — mirror homepage pg-hero */
+  .shop-hero__bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+  .shop-hero__orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.17;
+  }
+  .shop-hero__orb--1 {
+    width: 560px; height: 560px;
+    background: var(--gold);
+    top: -140px; right: -120px;
+  }
+  .shop-hero__orb--2 {
+    width: 360px; height: 360px;
+    background: #5c55ff;
+    bottom: -100px; left: -100px;
+  }
+  .shop-hero__orb--3 {
+    width: 280px; height: 280px;
+    background: var(--gold-light);
+    top: 40%; left: 25%;
+    opacity: 0.06;
+    filter: blur(60px);
+  }
+
+  /* Noise texture overlay — matches homepage .pg-hero__noise */
+  .shop-hero__noise {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    background-size: 200px;
+    opacity: 0.4;
+    mix-blend-mode: overlay;
+  }
+
+  /* Thin horizontal rule above category badge */
+  .shop-hero__rule {
+    width: 40px; height: 1px;
+    background: var(--gold);
+    margin: 0 auto 1.4rem;
+    opacity: 0.55;
+  }
+
+  .shop-hero__body {
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin-inline: auto;
+  }
+
+  /* Category badge — mirrors homepage .badge */
+  .shop-category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 99px;
+    padding: 0.38rem 1rem;
+    font-size: 0.72rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 1.4rem;
+    backdrop-filter: blur(8px);
+  }
+  .shop-category-badge .badge__dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-glow);
+    flex-shrink: 0;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  /* Shop name — large display serif */
+  .shop-hero__name {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+    color: var(--white);
+    margin-bottom: 1.2rem;
+  }
+
+  /* Description */
+  .shop-hero__desc {
+    font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+    color: rgba(255,255,255,0.58);
+    line-height: 1.72;
+    max-width: 540px;
+    margin: 0 auto 2.4rem;
+  }
+
+  /* CTA button row */
+  .shop-hero__actions {
+    display: flex;
+    gap: 0.85rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Scroll hint */
+  .shop-hero__scroll {
+    position: absolute;
+    bottom: 2.2rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 1;
+  }
+  .shop-hero__scroll span {
+    font-size: 0.68rem;
+    font-family: var(--font-body);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.28);
+  }
+  .scroll-line {
+    width: 1px; height: 38px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50%       { opacity: 1;   transform: scaleY(1.15); }
+  }
+
+  /* Stats strip inside hero bottom — quick scannable info */
+  .shop-hero__stats {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 1;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    justify-content: center;
+    gap: 0;
+  }
+  .shop-hero__stat {
+    flex: 1;
+    max-width: 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 1.2rem 1rem;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .shop-hero__stat:last-child { border-right: none; }
+  .shop-hero__stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    font-family: var(--font-body);
+  }
+  .shop-hero__stat-value {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.8);
+    font-family: var(--font-body);
+  }
+
+  /* Section clip into dark — match homepage wave */
+  .section-clip--cream {
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 80px;
+    background: var(--cream);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+
+
+  /* ══════════════════════════════════════════════════════
+     SHOP DETAILS — dark info cards with glass effect
+  ══════════════════════════════════════════════════════ */
+  .shop-details-section {
+    background: var(--cream);
+    padding: 5.5rem 0 5rem;
+    position: relative;
+  }
+
   .shop-info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.4rem; margin-top: 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin-top: 3rem;
   }
+
   .shop-info-card {
-    background: #fff; border: 1px solid rgba(0,0,0,.07);
-    border-radius: 1rem; padding: 1.5rem;
-    display: flex; gap: 1rem; align-items: flex-start;
-    box-shadow: 0 2px 12px rgba(0,0,0,.05);
+    background: var(--charcoal);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--r-md);
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    box-shadow:
+      0 4px 24px rgba(0,0,0,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: transform var(--transition), box-shadow var(--transition);
+    position: relative;
+    overflow: hidden;
   }
-  .shop-info-card__icon  { font-size: 1.5rem; flex-shrink: 0; margin-top: .1rem; }
+  .shop-info-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,147,42,0.4), transparent);
+  }
+  .shop-info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+
+  .shop-info-card__icon-wrap {
+    width: 44px; height: 44px;
+    border-radius: var(--r-sm);
+    background: rgba(201,147,42,0.12);
+    border: 1px solid rgba(201,147,42,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
   .shop-info-card__label {
-    font-size: .72rem; letter-spacing: .06em;
-    text-transform: uppercase; color: #888; margin-bottom: .25rem;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 0.35rem;
+    font-family: var(--font-body);
   }
-  .shop-info-card__value { font-size: .95rem; color: var(--ink, #1a1a2e); font-weight: 500; line-height: 1.5; }
-  .shop-info-card__value a { color: inherit; text-decoration: none; }
-  .shop-info-card__value a:hover { text-decoration: underline; }
+  .shop-info-card__value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.55;
+    font-family: var(--font-body);
+  }
+  .shop-info-card__value a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition);
+  }
+  .shop-info-card__value a:hover { color: var(--gold-light); }
 
-  /* ── Products ── */
-  .products-grid { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+
+  /* ══════════════════════════════════════════════════════
+     PRODUCTS — dark section with elegant chips
+  ══════════════════════════════════════════════════════ */
+  .shop-products-section {
+    background: var(--charcoal-3);
+    padding: 5.5rem 0 6rem;
+    position: relative;
+  }
+  .shop-products-section .section-clip--top {
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: 80px;
+    background: var(--cream);
+    clip-path: ellipse(55% 100% at 50% 0%);
+  }
+  .shop-products-section .section-clip--bottom {
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 80px;
+    background: var(--charcoal-3);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+
+  /* Product chips — premium dark style */
+  .products-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.5rem;
+    justify-content: center;
+  }
+
   .product-chip {
-    background: rgba(255,255,255,.1); color: #fff;
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 2rem; padding: .45rem 1.1rem;
-    font-size: .85rem; font-weight: 500;
-    --i: attr(data-index);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 99px;
+    padding: 0.55rem 1.3rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    font-family: var(--font-body);
+    transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+    cursor: default;
+    transition-delay: calc(var(--i, 0) * 0.05s);
+  }
+  .product-chip:hover {
+    background: rgba(201,147,42,0.14);
+    border-color: rgba(201,147,42,0.4);
+    color: var(--gold-light);
+    transform: translateY(-2px);
   }
 
-  /* ── Share Bar ── */
-  .share-bar { background: var(--ink); color: #fff; padding: 2.5rem 0; text-align: center; }
-  .share-bar__title {
-    font-size: .85rem; color: rgba(255,255,255,.6);
-    margin-bottom: 1rem; letter-spacing: .06em; text-transform: uppercase;
+
+  /* ══════════════════════════════════════════════════════
+     SHARE / CTA — premium dark strip
+  ══════════════════════════════════════════════════════ */
+  .shop-share-section {
+    background: var(--charcoal-3);
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
   }
-  .share-bar__btns { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
-  .btn--wa   { background: #25d366; color: #fff; }
-  .btn--copy { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.25); cursor: pointer; }
-  .btn--map  { background: #4285f4; color: #fff; }
+  .shop-share-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,147,42,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 10% 60%, rgba(92,85,255,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .shop-share-section .section-clip--top {
+    position: absolute;
+    top: -1px; left: 0; right: 0;
+    height: 70px;
+    background: var(--charcoal-3);
+    clip-path: ellipse(55% 100% at 50% 0%);
+  }
+
+  .shop-share__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    margin-inline: auto;
+    text-align: center;
+    padding-inline: 1.5rem;
+  }
+  .shop-share__eyebrow {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.9rem;
+    display: block;
+  }
+  .shop-share__title {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3.5vw, 2.6rem);
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 0.7rem;
+  }
+  .shop-share__sub {
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 2.2rem;
+    line-height: 1.6;
+  }
+  .shop-share__btns {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Share-specific button variants */
+  .btn--wa {
+    background: #1fad54;
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(31,173,84,0.28);
+  }
+  .btn--wa:hover {
+    background: #19943f;
+    box-shadow: 0 8px 28px rgba(31,173,84,0.38);
+  }
+  .btn--copy {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.78);
+    border: 1.5px solid rgba(255,255,255,0.18);
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .btn--copy:hover {
+    background: rgba(255,255,255,0.14);
+    color: var(--white);
+    border-color: rgba(255,255,255,0.35);
+  }
+  .btn--maps {
+    background: rgba(66,133,244,0.15);
+    color: #85b4ff;
+    border: 1.5px solid rgba(66,133,244,0.3);
+  }
+  .btn--maps:hover {
+    background: rgba(66,133,244,0.25);
+    color: #fff;
+    border-color: rgba(66,133,244,0.55);
+  }
+
+
+  /* ══════════════════════════════════════════════════════
+     SECTION UTILITIES (shop-scoped overrides)
+  ══════════════════════════════════════════════════════ */
+  .section-title--light {
+    color: var(--white);
+  }
+  .eyebrow--shop {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.65rem;
+    font-family: var(--font-body);
+  }
+  .shop-section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    line-height: 1.12;
+    color: var(--charcoal);
+    margin-bottom: 0;
+  }
+  .shop-section-title--light { color: var(--white); }
+
+  .section-header-shop {
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     PULSE ANIMATION (for badge dot)
+  ══════════════════════════════════════════════════════ */
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px var(--gold-glow); }
+    50%       { box-shadow: 0 0 0 6px transparent; }
+  }
+
+
+  /* ══════════════════════════════════════════════════════
+     RESPONSIVE — shop page
+  ══════════════════════════════════════════════════════ */
+  @media (max-width: 720px) {
+    .shop-hero { padding: 6rem 1.5rem 5rem; }
+    .shop-hero__stats { display: none; }
+    .shop-info-grid { grid-template-columns: 1fr; }
+    .products-grid { justify-content: flex-start; }
+    .shop-share__btns { flex-direction: column; align-items: center; }
+    .shop-share__btns .btn { width: 100%; max-width: 320px; justify-content: center; }
+  }
+
+  @media (max-width: 440px) {
+    .shop-hero__actions { flex-direction: column; align-items: center; }
+    .shop-hero__actions .btn { width: 100%; max-width: 280px; justify-content: center; }
+  }
+
 </style>
 {% endblock %}
 
+
 {% block content %}
 
-<!-- ═══════════════════════════════════════
-     SHOP HERO — dark
-═══════════════════════════════════════ -->
-<section class="shop-hero">
+<!-- ═══════════════════════════════════════════════════════════
+     SHOP HERO — full-viewport dark, cinematic
+═══════════════════════════════════════════════════════════ -->
+<section class="shop-hero" id="hero">
+
+  <!-- Background atmosphere -->
   <div class="shop-hero__bg">
     <div class="shop-hero__orb shop-hero__orb--1"></div>
     <div class="shop-hero__orb shop-hero__orb--2"></div>
+    <div class="shop-hero__orb shop-hero__orb--3"></div>
+    <div class="shop-hero__noise"></div>
   </div>
+
+  <!-- Main body -->
   <div class="shop-hero__body">
+
+    <div class="shop-hero__rule reveal"></div>
+
     <div class="shop-category-badge reveal">
       <span class="badge__dot"></span>
       {{ shop.category }}
     </div>
-    <h1 class="shop-hero__name reveal reveal--d1">{{ shop.shop_name }}</h1>
+
+    <h1 class="shop-hero__name reveal reveal--d1">
+      {{ shop.shop_name }}
+    </h1>
+
     {% if shop.description %}
     <p class="shop-hero__desc reveal reveal--d2">{{ shop.description }}</p>
     {% endif %}
+
     <div class="shop-hero__actions reveal reveal--d3">
-      <a href="tel:{{ shop.contact }}" class="btn btn--gold">📞 Call Now</a>
+      <a href="tel:{{ shop.contact }}" class="btn btn--gold btn--lg">📞 Call Now</a>
       {% if shop.address %}
       <a href="https://www.google.com/maps/search/{{ shop.address | urlencode }}"
-         target="_blank" rel="noopener" class="btn btn--ghost-light">📍 View on Map</a>
+         target="_blank" rel="noopener" class="btn btn--ghost-light btn--lg">📍 View on Map</a>
       {% endif %}
     </div>
+
+  </div><!-- /.shop-hero__body -->
+
+  <!-- Scroll hint -->
+  <div class="shop-hero__scroll reveal reveal--d4">
+    <span>Shop Details</span>
+    <div class="scroll-line"></div>
   </div>
+
+  <!-- Quick-glance stat strip -->
+  <div class="shop-hero__stats">
+    {% if shop.contact %}
+    <div class="shop-hero__stat">
+      <span class="shop-hero__stat-label">Contact</span>
+      <span class="shop-hero__stat-value">{{ shop.contact }}</span>
+    </div>
+    {% endif %}
+    {% if shop.hours %}
+    <div class="shop-hero__stat">
+      <span class="shop-hero__stat-label">Hours</span>
+      <span class="shop-hero__stat-value">{{ shop.hours }}</span>
+    </div>
+    {% endif %}
+    {% if shop.address %}
+    <div class="shop-hero__stat">
+      <span class="shop-hero__stat-label">Location</span>
+      <span class="shop-hero__stat-value">{{ shop.address | truncate(38, true, '…') }}</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Wave clip into cream section -->
   <div class="section-clip section-clip--cream"></div>
+
 </section>
 
 
-<!-- ═══════════════════════════════════════
-     SHOP DETAILS — cream section
-═══════════════════════════════════════ -->
-<section class="section bg-cream">
+<!-- ═══════════════════════════════════════════════════════════
+     SHOP DETAILS — cream section with dark glassmorphic cards
+═══════════════════════════════════════════════════════════ -->
+<section class="shop-details-section" id="details">
   <div class="container">
-    <div class="section-header reveal">
-      <span class="eyebrow">Shop Details</span>
-      <h2 class="section-title">About {{ shop.shop_name }}</h2>
+
+    <div class="section-header-shop reveal">
+      <span class="eyebrow--shop">Shop Details</span>
+      <h2 class="shop-section-title">About {{ shop.shop_name }}</h2>
     </div>
 
     <div class="shop-info-grid">
+
+      <!-- Contact -->
       <div class="shop-info-card reveal">
-        <div class="shop-info-card__icon">📞</div>
+        <div class="shop-info-card__icon-wrap">📞</div>
         <div>
           <p class="shop-info-card__label">Contact</p>
           <p class="shop-info-card__value">
@@ -148,88 +617,117 @@
           </p>
         </div>
       </div>
-      <div class="shop-info-card reveal">
-        <div class="shop-info-card__icon">🕐</div>
+
+      <!-- Hours -->
+      {% if shop.hours %}
+      <div class="shop-info-card reveal" style="--i:1">
+        <div class="shop-info-card__icon-wrap">🕐</div>
         <div>
           <p class="shop-info-card__label">Opening Hours</p>
           <p class="shop-info-card__value">{{ shop.hours }}</p>
         </div>
       </div>
-      <div class="shop-info-card reveal">
-        <div class="shop-info-card__icon">📍</div>
+      {% endif %}
+
+      <!-- Address -->
+      {% if shop.address %}
+      <div class="shop-info-card reveal" style="--i:2">
+        <div class="shop-info-card__icon-wrap">📍</div>
         <div>
           <p class="shop-info-card__label">Address</p>
           <p class="shop-info-card__value">{{ shop.address }}</p>
         </div>
       </div>
+      {% endif %}
+
     </div>
   </div>
 </section>
 
 
-<!-- ═══════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      PRODUCTS / SERVICES — dark section
-═══════════════════════════════════════ -->
+═══════════════════════════════════════════════════════════ -->
 {% if shop.products %}
-<section class="section bg-dark">
-  <div class="section-clip section-clip--dark section-clip--top"></div>
+<section class="shop-products-section" id="products">
+
+  <!-- Wave clip from cream -->
+  <div class="section-clip--top"></div>
+
   <div class="container">
-    <div class="section-header reveal">
-      <span class="eyebrow eyebrow--light">What We Offer</span>
-      <h2 class="section-title section-title--light">Products &amp; Services</h2>
+    <div class="section-header-shop reveal">
+      <span class="eyebrow--shop" style="color: var(--gold-light);">What We Offer</span>
+      <h2 class="shop-section-title shop-section-title--light">Products &amp; Services</h2>
     </div>
+
     <div class="products-grid">
       {% for product in shop.products %}
-      <span class="product-chip reveal" data-index="{{ loop.index0 }}">{{ product }}</span>
+      <span class="product-chip reveal" style="--i: {{ loop.index0 }}" data-index="{{ loop.index0 }}">
+        {{ product }}
+      </span>
       {% endfor %}
     </div>
   </div>
-  <div class="section-clip section-clip--cream section-clip--bottom"></div>
+
+  <!-- Wave clip to share section -->
+  <div class="section-clip--bottom"></div>
+
 </section>
 {% endif %}
 
 
-<!-- ═══════════════════════════════════════
-     SHARE BAR
-═══════════════════════════════════════ -->
-<section class="share-bar">
-  <p class="share-bar__title">Share this shop page</p>
-  <div class="share-bar__btns">
-    <a href="https://wa.me/?text={{ ('Check out ' ~ shop.shop_name ~ ': ' ~ request.url) | urlencode }}"
-       target="_blank" rel="noopener" class="btn btn--wa">💬 Share on WhatsApp</a>
-    <button class="btn btn--copy" onclick="copyLink()">🔗 Copy Link</button>
-    <a href="https://www.google.com/maps/search/{{ shop.address | urlencode }}"
-       target="_blank" rel="noopener" class="btn btn--map">🗺 View on Google Maps</a>
+<!-- ═══════════════════════════════════════════════════════════
+     SHARE — premium CTA strip
+═══════════════════════════════════════════════════════════ -->
+<section class="shop-share-section" id="share">
+
+  <div class="shop-share__inner">
+    <span class="shop-share__eyebrow reveal">Share This Shop</span>
+    <h2 class="shop-share__title reveal reveal--d1">
+      Know someone who'd love<br>{{ shop.shop_name }}?
+    </h2>
+    <p class="shop-share__sub reveal reveal--d2">
+      Share the link and let them discover this shop in seconds.
+    </p>
+    <div class="shop-share__btns reveal reveal--d3">
+      <a href="https://wa.me/?text={{ ('Check out ' ~ shop.shop_name ~ ': ' ~ request.url) | urlencode }}"
+         target="_blank" rel="noopener" class="btn btn--wa">💬 Share on WhatsApp</a>
+      <button class="btn btn--copy" onclick="copyLink()">🔗 Copy Link</button>
+      {% if shop.address %}
+      <a href="https://www.google.com/maps/search/{{ shop.address | urlencode }}"
+         target="_blank" rel="noopener" class="btn btn--maps">🗺 Google Maps</a>
+      {% endif %}
+    </div>
   </div>
+
 </section>
 
 
-<!-- ═══════════════════════════════════════
-     CTA BANNER
-═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════════════════════
+     CTA BANNER — get your own site
+═══════════════════════════════════════════════════════════ -->
 <section class="cta-banner">
   <div class="cta-banner__inner reveal">
     <div>
       <h2 class="cta-banner__title">Want a page like this for your shop?</h2>
-      <p class="cta-banner__sub">It's free and takes under 2 minutes.</p>
+      <p class="cta-banner__sub">Free, no code, live in under 2 minutes.</p>
     </div>
     <a href="{{ url_for('index') }}#form" class="btn btn--gold btn--lg">Create My Shop Site ✦</a>
   </div>
 </section>
 
-<!-- Toast -->
+<!-- Toast notification -->
 <div class="toast" id="toast">Link copied!</div>
 
 {% endblock %}
 
+
 {% block extra_js %}
 <script>
   function copyLink() {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-      showToast('Link copied to clipboard!');
-    }).catch(() => {
-      showToast('Copy the URL from your browser bar.');
-    });
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => showToast('Link copied to clipboard!'))
+      .catch(() => showToast('Copy the URL from your browser bar.'));
   }
 </script>
 {% endblock %}
