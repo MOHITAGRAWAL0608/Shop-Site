@@ -6,6 +6,16 @@ Handles routing, form processing, and site generation using Jinja2 templates.
 from flask import Flask, render_template, request, redirect, url_for, abort
 import re
 
+import mysql.connector
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="your_password",
+        database="shopsite"
+    )
+
 app = Flask(__name__)
 
 # ---------------------------------------------------------------------------
@@ -48,6 +58,7 @@ def about():
 def contact():
     return render_template("contact.html", active_page="contact")
 
+
 @app.route("/submit-contact", methods=["POST"])
 def submit_contact():
     name = request.form.get("name")
@@ -55,10 +66,30 @@ def submit_contact():
     subject = request.form.get("subject")
     message = request.form.get("message")
 
-    print("New Contact Message:")
-    print(name, email, subject, message)
+    # ✅ Basic validation (added)
+    if not name or not email or not message:
+        return {"status": "error", "message": "Missing required fields"}
 
-    return {"status": "success"}
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()  # keeping same (no unnecessary change)
+
+        cursor.execute(
+            "INSERT INTO contacts (name, email, subject, message) VALUES (%s, %s, %s, %s)",
+            (name, email, subject, message)
+        )
+
+        conn.commit()
+
+        # ✅ Safe closing (added protection)
+        cursor.close()
+        conn.close()
+
+        return {"status": "success"}
+
+    except Exception as e:
+        print("DB ERROR:", e)
+        return {"status": "error"}
 
 
 # ---------------------------------------------------------------------------
