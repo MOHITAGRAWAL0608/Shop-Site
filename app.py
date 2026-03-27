@@ -12,11 +12,33 @@ def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="your_password",
+        password="mohit_123",
         database="shopsite"
     )
 
 app = Flask(__name__)
+def init_mysql():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS shops (
+        slug VARCHAR(255) PRIMARY KEY,
+        shop_name TEXT,
+        category TEXT,
+        description TEXT,
+        products TEXT,
+        hours TEXT,
+        contact TEXT,
+        address TEXT
+    )
+    """)
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+init_mysql()
 
 # ---------------------------------------------------------------------------
 # In-memory store: { slug: shop_data_dict }
@@ -129,6 +151,7 @@ def generate():
         slug = f"{base_slug}-{counter}"
         counter += 1
 
+    # store in memory (unchanged)
     SHOPS[slug] = {
         "shop_name":   shop_name,
         "slug":        slug,
@@ -140,6 +163,32 @@ def generate():
         "address":     address,
     }
 
+    # store in MySQL (ADDED)
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO shops (slug, shop_name, category, description, products, hours, contact, address)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            slug,
+            shop_name,
+            category or "General",
+            description,
+            ",".join(products),
+            hours or "Not specified",
+            contact,
+            address
+        ))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    except Exception as e:
+        print("MYSQL INSERT ERROR:", e)
+
     return redirect(url_for("view_site", shop_slug=slug))
 
 
@@ -149,6 +198,26 @@ def generate():
 @app.route("/site/<shop_slug>")
 def view_site(shop_slug):
     shop = SHOPS.get(shop_slug)
+
+    # if not in memory → fetch from MySQL
+    if not shop:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor(dictionary=True)
+
+            cursor.execute("SELECT * FROM shops WHERE slug = %s", (shop_slug,))
+            shop = cursor.fetchone()
+
+            cursor.close()
+            conn.close()
+
+            if shop:
+                # convert products string → list
+                shop["products"] = [p.strip() for p in shop["products"].split(",") if p.strip()]
+
+        except Exception as e:
+            print("MYSQL FETCH ERROR:", e)
+
     if not shop:
         abort(404)
     return render_template("site.html", shop=shop)
