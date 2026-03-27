@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In — ShopSite{% endblock %}
+{% block meta_description %}Sign in to ShopSite to manage and create shop websites.{% endblock %}
+
+{% block content %}
+<section class="auth-page">
+
+  <!-- Ambient background -->
+  <div class="auth-page__bg">
+    <div class="auth-orb auth-orb--1"></div>
+    <div class="auth-orb auth-orb--2"></div>
+    <div class="auth-noise"></div>
+  </div>
+
+  <div class="auth-wrap">
+
+    <!-- Branding -->
+    <a href="{{ url_for('index') }}" class="auth-brand reveal">
+      <span class="auth-brand__dot"></span>
+      Shop<span class="auth-brand__accent">Site</span>
+    </a>
+
+    <div class="auth-card reveal reveal--d1">
+
+      <!-- Header -->
+      <div class="auth-card__head">
+        <span class="auth-eyebrow">Welcome back</span>
+        <h1 class="auth-card__title">Sign in to ShopSite</h1>
+        <p class="auth-card__sub">Enter your credentials to continue</p>
+      </div>
+
+      <!-- Errors -->
+      {% if errors %}
+      <div class="auth-error-box" role="alert">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M10 6v5M10 13.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <ul>{% for err in errors %}<li>{{ err }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+
+      <!-- Form -->
+      <form action="{{ url_for('login') }}" method="POST" novalidate id="loginForm">
+        <input type="hidden" name="next" value="{{ next_url }}" />
+
+        <div class="auth-field">
+          <label for="identifier">Email or Username</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <input type="text" id="identifier" name="identifier"
+              placeholder="you@example.com or username"
+              value="{{ form_data.identifier if form_data else '' }}"
+              autocomplete="username" required />
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <div class="auth-field__top-row">
+            <label for="password">Password</label>
+          </div>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input type="password" id="password" name="password"
+              placeholder="Your password"
+              autocomplete="current-password" required />
+            <button type="button" class="auth-toggle-pw" aria-label="Show password" tabindex="-1">
+              <svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="auth-btn">
+          <span>Sign In</span>
+          <span class="auth-btn__arrow">→</span>
+        </button>
+
+      </form>
+
+      <!-- Footer link -->
+      <p class="auth-card__footer">
+        Don't have an account?
+        <a href="{{ url_for('signup') }}" class="auth-link">Create one free →</a>
+      </p>
+
+    </div><!-- /auth-card -->
+
+    <!-- Trust chips -->
+    <div class="auth-trust reveal reveal--d2">
+      <span>🔒 Secure login</span>
+      <span>·</span>
+      <span>🆓 Free forever</span>
+      <span>·</span>
+      <span>⚡ Instant access</span>
+    </div>
+
+  </div><!-- /auth-wrap -->
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /* Password visibility toggle */
+  document.querySelectorAll('.auth-toggle-pw').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = btn.closest('.auth-input-wrap').querySelector('input');
+      const isText = input.type === 'text';
+      input.type = isText ? 'password' : 'text';
+      btn.querySelector('.eye-open').style.display  = isText ? '' : 'none';
+      btn.querySelector('.eye-closed').style.display = isText ? 'none' : '';
+    });
+  });
+
+  /* Client-side validation */
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    let ok = true;
+    ['identifier', 'password'].forEach(name => {
+      const el = this.querySelector(`[name="${name}"]`);
+      const empty = !el.value.trim();
+      el.classList.toggle('input--error', empty);
+      if (empty) ok = false;
+    });
+    if (!ok) e.preventDefault();
+  });
+
+  document.querySelectorAll('.auth-card input').forEach(el =>
+    el.addEventListener('input', () => el.classList.remove('input--error'))
+  );
+</script>
+{% endblock %}

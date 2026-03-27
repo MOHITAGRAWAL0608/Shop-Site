@@ -55,9 +55,21 @@
            class="site-nav__link{% if active_page == 'contact' %} site-nav__link--active{% endif %}">
           Contact Us
         </a>
-        <a href="{{ url_for('index') }}" class="site-nav__cta">
-          Create a Site ✦
-        </a>
+        {% if session.get('user_id') %}
+          <span class="site-nav__user">
+            <span class="site-nav__user-dot"></span>
+            {{ session.get('username') }}
+          </span>
+          <a href="{{ url_for('logout') }}" class="site-nav__logout">Log out</a>
+        {% else %}
+          <a href="{{ url_for('login') }}"
+             class="site-nav__link{% if active_page == 'login' %} site-nav__link--active{% endif %}">
+            Sign In
+          </a>
+          <a href="{{ url_for('signup') }}" class="site-nav__cta">
+            Get Started ✦
+          </a>
+        {% endif %}
       </nav>
     </div>
   </header>
