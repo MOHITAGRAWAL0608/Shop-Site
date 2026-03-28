@@ -10,3 +10,4 @@ mysql-connector-python==9.6.0
 packaging==26.0
 Werkzeug==3.1.7
 razorpay==1.4.1
+setuptools
