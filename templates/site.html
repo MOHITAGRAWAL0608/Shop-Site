@@ -702,6 +702,21 @@
 
 </section>
 
+<section class="domain-upgrade-section" style="background:#0f0f0f;padding:4rem 1.5rem;text-align:center;">
+
+  <h2 style="color:white;font-size:2rem;margin-bottom:0.5rem;">
+    Want full access to your website's domain?
+  </h2>
+
+  <p style="color:rgba(255,255,255,0.6);margin-bottom:1.5rem;">
+    Domain prices start @ ₹249 only
+  </p>
+
+  <button id="openDomainModal" class="btn btn--gold btn--lg">
+    Check Availability & Continue →
+  </button>
+
+</section>
 
 <!-- ═══════════════════════════════════════════════════════════
      CTA BANNER — get your own site
@@ -729,5 +744,240 @@
       .then(() => showToast('Link copied to clipboard!'))
       .catch(() => showToast('Copy the URL from your browser bar.'));
   }
+
+  (function () {
+    const overlay      = document.getElementById('domainModalOverlay');
+    const openBtn      = document.getElementById('openDomainModal');
+    const closeBtn     = document.getElementById('closeDomainModal');
+    const searchBtn    = document.getElementById('domainSearchBtn');
+    const domainInput  = document.getElementById('domainInput');
+    const resultBox    = document.getElementById('domainResult');
+    const resultText   = document.getElementById('domainResultText');
+    const proceedBtn   = document.getElementById('domainProceedBtn');
+
+    let currentOrderAmount = null;
+    let currentDomain      = null;
+
+    function openModal() {
+      overlay.classList.add('modal--open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => domainInput.focus(), 80);
+    }
+
+    function closeModal() {
+      overlay.classList.remove('modal--open');
+      document.body.style.overflow = '';
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && overlay.classList.contains('modal--open')) closeModal();
+    });
+
+    domainInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') searchDomain();
+    });
+
+    searchBtn.addEventListener('click', searchDomain);
+
+    function searchDomain() {
+      const raw = domainInput.value.trim().toLowerCase();
+
+      const cleaned = raw.replace(/[^a-z0-9.-]/g, '');
+      if (!cleaned) {
+        domainInput.focus();
+        return;
+      }
+
+      const domain = cleaned.includes('.') ? cleaned : cleaned + '.in';
+
+      currentDomain = domain;
+      currentOrderAmount = null;
+
+      resultBox.className = 'domain-modal__result result--loading';
+      resultText.textContent = '⏳ Checking availability for ' + domain + ' …';
+      proceedBtn.classList.remove('btn--visible');
+
+      searchBtn.disabled = true;
+      searchBtn.textContent = '…';
+
+      setTimeout(function () {
+        var fakeAvailable = Math.random() > 0.38;
+        var prices        = [249, 349, 499, 699];
+        var fakePrice     = prices[Math.floor(Math.random() * prices.length)];
+
+        handleDomainResult({
+          available:   fakeAvailable,
+          domain:      domain,
+          price_inr:   fakePrice,
+          price_paise: fakePrice * 100
+        });
+
+        searchBtn.disabled  = false;
+        searchBtn.textContent = 'Search';
+      }, 1250);
+    }
+
+    function handleDomainResult(data) {
+      if (data.available) {
+        currentOrderAmount = data.price_paise;
+
+        resultBox.className = 'domain-modal__result result--available';
+        resultText.textContent =
+          '✅ ' + data.domain + ' is available — ₹' + data.price_inr + '/yr';
+
+        proceedBtn.textContent =
+          '✦ Get ' + data.domain + ' for ₹' + data.price_inr;
+
+        proceedBtn.classList.add('btn--visible');
+      } else {
+        currentOrderAmount = null;
+
+        resultBox.className = 'domain-modal__result result--unavailable';
+        resultText.textContent =
+          '✗ ' + data.domain + ' is taken. Try a different name.';
+
+        proceedBtn.classList.remove('btn--visible');
+      }
+    }
+
+    proceedBtn.addEventListener('click', function () {
+
+      if (!currentOrderAmount || currentOrderAmount < 100) {
+        showToast('Invalid pricing. Please try again.');
+        return;
+      }
+
+      var originalText = proceedBtn.textContent;
+      proceedBtn.textContent = '⏳ Preparing secure checkout…';
+      proceedBtn.disabled = true;
+
+      fetch('/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: currentOrderAmount,
+          domain: currentDomain
+        })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (order) {
+
+        var options = {
+          key: 'rzp_live_SWUODB3rg6QScw',  // ✅ FIXED
+          amount: order.amount,
+          currency: order.currency || 'INR',
+          name: 'ShopSite',
+          description: 'Domain registration: ' + currentDomain,
+          order_id: order.id,
+          theme: { color: '#c9932a' },
+
+          handler: function (response) {
+            fetch('/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response)
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (result) {
+
+              closeModal();
+
+              if (result.status === 'success') {
+                showToast('🎉 Domain secured! We\'ll be in touch shortly.');
+              } else {
+                showToast('⚠ Payment verification failed.');
+              }
+            })
+            .catch(function () {
+              showToast('⚠ Verification failed. Try again.');
+            });
+          },
+
+          modal: {
+            ondismiss: function () {
+              proceedBtn.textContent = originalText;
+              proceedBtn.disabled = false;
+            }
+          }
+        };
+
+        var rzp = new Razorpay(options);
+        rzp.open();
+
+        proceedBtn.textContent = originalText;
+        proceedBtn.disabled = false;
+      })
+      .catch(function () {
+        showToast('Something went wrong. Please try again.');
+        proceedBtn.textContent = originalText;
+        proceedBtn.disabled = false;
+      });
+
+    });
+
+  })();
 </script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
 {% endblock %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const btn = document.getElementById("pay-btn");
+
+    if (btn) {
+        btn.addEventListener("click", async function () {
+            console.log("Button clicked");
+
+            const res = await fetch("/create-order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: 249 })
+            });
+
+            const data = await res.json();
+
+            const options = {
+                key: data.key,
+                amount: data.amount,
+                currency: "INR",
+                name: "ShopSite",
+                description: "Domain Purchase",
+                order_id: data.order_id,
+
+                handler: async function (response) {
+                    const verify = await fetch("/verify-payment", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            order_id: response.razorpay_order_id,
+                            payment_id: response.razorpay_payment_id,
+                            signature: response.razorpay_signature
+                        })
+                    });
+
+                    const result = await verify.json();
+
+                    if (result.status === "success") {
+                        alert("Payment successful 🎉");
+                    } else {
+                        alert("Payment failed");
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        });
+    }
+
+});
+</script>

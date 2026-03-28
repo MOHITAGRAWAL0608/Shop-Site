@@ -4,11 +4,14 @@ Handles routing, form processing, and site generation using Jinja2 templates.
 Auth system: signup / login / logout via Flask sessions + werkzeug password hashing.
 """
 
-from flask import Flask, render_template, request, redirect, url_for, abort, session
+from flask import Flask, render_template, request, redirect, url_for, abort, session, jsonify
 import re
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+import razorpay
+import hmac
+import hashlib
 
 
 # ---------------------------------------------------------------------------
@@ -24,17 +27,22 @@ def get_db_connection():
 
 
 app = Flask(__name__)
-app.secret_key = "change-this-to-a-long-random-secret-in-production"   # ← change before deploy
+app.secret_key = "change-this-to-a-long-random-secret-in-production"
 
 
 # ---------------------------------------------------------------------------
-# DB init: create tables if they don't exist yet
+# ✅ Razorpay Client (ADDED)
+# ---------------------------------------------------------------------------
+client = razorpay.Client(auth=("rzp_live_SWUODB3rg6QScw", "VoAU4u6lNiZWqZ4I0aEctwIP"))
+
+
+# ---------------------------------------------------------------------------
+# DB init
 # ---------------------------------------------------------------------------
 def init_mysql():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # users table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
         id         INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,7 +53,6 @@ def init_mysql():
     )
     """)
 
-    # shops table (with user_id)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS shops (
         slug      VARCHAR(255) PRIMARY KEY,
@@ -61,7 +68,6 @@ def init_mysql():
     )
     """)
 
-    # contacts table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS contacts (
         id      INT AUTO_INCREMENT PRIMARY KEY,
@@ -82,7 +88,7 @@ init_mysql()
 
 
 # ---------------------------------------------------------------------------
-# In-memory store: { slug: shop_data_dict }
+# In-memory store
 # ---------------------------------------------------------------------------
 SHOPS = {}
 
@@ -100,7 +106,7 @@ def login_required(f):
 
 
 # ---------------------------------------------------------------------------
-# Helper: convert a shop name to a URL-safe slug
+# Slugify
 # ---------------------------------------------------------------------------
 def slugify(text: str) -> str:
     text = text.lower().strip()
@@ -111,24 +117,18 @@ def slugify(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Route: / → Home (input form)
+# Routes
 # ---------------------------------------------------------------------------
 @app.route("/")
 def index():
     return render_template("form.html", active_page="home")
 
 
-# ---------------------------------------------------------------------------
-# Route: /about
-# ---------------------------------------------------------------------------
 @app.route("/about")
 def about():
     return render_template("about.html", active_page="about")
 
 
-# ---------------------------------------------------------------------------
-# Route: /contact
-# ---------------------------------------------------------------------------
 @app.route("/contact")
 def contact():
     return render_template("contact.html", active_page="contact")
@@ -161,6 +161,47 @@ def submit_contact():
 
 
 # ---------------------------------------------------------------------------
+# ✅ Razorpay Routes (ADDED)
+# ---------------------------------------------------------------------------
+@app.route("/create-order", methods=["POST"])
+def create_order():
+    data = request.get_json()
+
+    amount = data.get("amount", 249)
+    amount_paise = int(amount * 100)
+
+    order = client.order.create({
+        "amount": amount_paise,
+        "currency": "INR",
+        "payment_capture": 1
+    })
+
+    return jsonify({
+        "order_id": order["id"],
+        "amount": amount_paise,
+        "key": "rzp_live_SWUODB3rg6QScw"
+    })
+
+
+@app.route("/verify-payment", methods=["POST"])
+def verify_payment():
+    data = request.get_json()
+
+    try:
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': data['order_id'],
+            'razorpay_payment_id': data['payment_id'],
+            'razorpay_signature': data['signature']
+        })
+
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        print("Verification Error:", e)
+        return jsonify({"status": "failed"}), 400
+
+
+# ---------------------------------------------------------------------------
 # AUTH — Signup
 # ---------------------------------------------------------------------------
 @app.route("/signup", methods=["GET", "POST"])
@@ -179,7 +220,6 @@ def signup():
 
         form_data = {"username": username, "email": email}
 
-        # Validation
         if not username or len(username) < 3:
             errors.append("Username must be at least 3 characters.")
         if not re.match(r"^[\w.-]+$", username or ""):
