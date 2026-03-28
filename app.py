@@ -6,12 +6,10 @@ Auth system: signup / login / logout via Flask sessions + werkzeug password hash
 
 from flask import Flask, render_template, request, redirect, url_for, abort, session, jsonify
 import re
+import urllib.parse
 import mysql.connector
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import razorpay
-import hmac
-import hashlib
 
 
 # ---------------------------------------------------------------------------
@@ -29,11 +27,10 @@ def get_db_connection():
 app = Flask(__name__)
 app.secret_key = "change-this-to-a-long-random-secret-in-production"
 
-
 # ---------------------------------------------------------------------------
-# ✅ Razorpay Client (ADDED)
+# YOUR WhatsApp number (with country code, no + or spaces)
 # ---------------------------------------------------------------------------
-client = razorpay.Client(auth=("rzp_live_SWUODB3rg6QScw", "VoAU4u6lNiZWqZ4I0aEctwIP"))
+WHATSAPP_NUMBER = "9302692535"   # ← Replace with your real number
 
 
 # ---------------------------------------------------------------------------
@@ -161,47 +158,6 @@ def submit_contact():
 
 
 # ---------------------------------------------------------------------------
-# ✅ Razorpay Routes (ADDED)
-# ---------------------------------------------------------------------------
-@app.route("/create-order", methods=["POST"])
-def create_order():
-    data = request.get_json()
-
-    amount = data.get("amount", 249)
-    amount_paise = int(amount * 100)
-
-    order = client.order.create({
-        "amount": amount_paise,
-        "currency": "INR",
-        "payment_capture": 1
-    })
-
-    return jsonify({
-        "order_id": order["id"],
-        "amount": amount_paise,
-        "key": "rzp_live_SWUODB3rg6QScw"
-    })
-
-
-@app.route("/verify-payment", methods=["POST"])
-def verify_payment():
-    data = request.get_json()
-
-    try:
-        client.utility.verify_payment_signature({
-            'razorpay_order_id': data['order_id'],
-            'razorpay_payment_id': data['payment_id'],
-            'razorpay_signature': data['signature']
-        })
-
-        return jsonify({"status": "success"})
-
-    except Exception as e:
-        print("Verification Error:", e)
-        return jsonify({"status": "failed"}), 400
-
-
-# ---------------------------------------------------------------------------
 # AUTH — Signup
 # ---------------------------------------------------------------------------
 @app.route("/signup", methods=["GET", "POST"])
@@ -273,7 +229,7 @@ def login():
     form_data = {}
 
     if request.method == "POST":
-        identifier = request.form.get("identifier", "").strip()  # email OR username
+        identifier = request.form.get("identifier", "").strip()
         password   = request.form.get("password", "")
         next_url   = request.form.get("next", "")
 
@@ -298,11 +254,11 @@ def login():
                     session["username"] = user["username"]
                     return redirect(next_url or url_for("index"))
                 else:
-                    errors.append("Invalid credentials. Please check your email/username and password.")
+                    errors.append("Invalid credentials.")
 
             except Exception as e:
                 print("LOGIN DB ERROR:", e)
-                errors.append("Something went wrong. Please try again.")
+                errors.append("Something went wrong.")
 
     next_url = request.args.get("next", "")
     return render_template("login.html", errors=errors, form_data=form_data,
@@ -319,7 +275,7 @@ def logout():
 
 
 # ---------------------------------------------------------------------------
-# Route: /generate (POST) — login required
+# Route: /generate
 # ---------------------------------------------------------------------------
 @app.route("/generate", methods=["POST"])
 @login_required
@@ -341,89 +297,72 @@ def generate():
         errors.append("Address is required.")
 
     if errors:
-        return render_template(
-            "form.html",
-            errors=errors,
-            form_data=request.form,
-            active_page="home"
-        )
+        return render_template("form.html", errors=errors, form_data=request.form, active_page="home")
 
-    products   = [p.strip() for p in products_raw.split(",") if p.strip()]
-    slug       = slugify(shop_name)
-    base_slug  = slug
-    counter    = 1
-    while slug in SHOPS:
-        slug = f"{base_slug}-{counter}"
-        counter += 1
+    products = [p.strip() for p in products_raw.split(",") if p.strip()]
+    slug = slugify(shop_name)
 
     user_id = session.get("user_id")
 
     SHOPS[slug] = {
-        "shop_name":   shop_name,
-        "slug":        slug,
-        "category":    category or "General",
+        "shop_name": shop_name,
+        "slug": slug,
+        "category": category or "General",
         "description": description,
-        "products":    products,
-        "hours":       hours or "Not specified",
-        "contact":     contact,
-        "address":     address,
-        "user_id":     user_id,
+        "products": products,
+        "hours": hours or "Not specified",
+        "contact": contact,
+        "address": address,
+        "user_id": user_id,
     }
-
-    try:
-        conn   = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO shops (slug, shop_name, category, description, products, hours, contact, address, user_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (
-            slug,
-            shop_name,
-            category or "General",
-            description,
-            ",".join(products),
-            hours or "Not specified",
-            contact,
-            address,
-            user_id,
-        ))
-        conn.commit()
-        cursor.close()
-        conn.close()
-    except Exception as e:
-        print("MYSQL INSERT ERROR:", e)
 
     return redirect(url_for("view_site", shop_slug=slug))
 
 
 # ---------------------------------------------------------------------------
-# Route: /site/<shop_slug>
+# View Site
 # ---------------------------------------------------------------------------
 @app.route("/site/<shop_slug>")
 def view_site(shop_slug):
     shop = SHOPS.get(shop_slug)
-
-    if not shop:
-        try:
-            conn   = get_db_connection()
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM shops WHERE slug = %s", (shop_slug,))
-            shop = cursor.fetchone()
-            cursor.close()
-            conn.close()
-
-            if shop:
-                shop["products"] = [p.strip() for p in shop["products"].split(",") if p.strip()]
-        except Exception as e:
-            print("MYSQL FETCH ERROR:", e)
-
     if not shop:
         abort(404)
     return render_template("site.html", shop=shop)
 
 
 # ---------------------------------------------------------------------------
-# Custom 404 page
+# ★ NEW: Request Go Live — redirects to WhatsApp with pre-filled message
+# ---------------------------------------------------------------------------
+@app.route("/request-go-live/<shop_slug>")
+def request_go_live(shop_slug):
+    shop = SHOPS.get(shop_slug)
+    if not shop:
+        abort(404)
+
+    site_url = url_for("view_site", shop_slug=shop_slug, _external=True)
+    products_str = ", ".join(shop["products"]) if shop["products"] else "N/A"
+
+    message = (
+        f"👋 Hello! I'd like to request my ShopSite to go live.\n\n"
+        f"🏪 *Shop Name:* {shop['shop_name']}\n"
+        f"🗂 *Category:* {shop['category']}\n"
+        f"📝 *Description:* {shop['description'] or 'N/A'}\n"
+        f"🛒 *Products/Services:* {products_str}\n"
+        f"📞 *Contact:* {shop['contact']}\n"
+        f"📍 *Address:* {shop['address']}\n"
+        f"🕐 *Hours:* {shop['hours']}\n\n"
+        f"🔗 *Generated Site:* {site_url}\n\n"
+        f"Please review and get back to me. Thank you!"
+    )
+
+    encoded_message = urllib.parse.quote(message)
+    whatsapp_url = f"https://wa.me/{WHATSAPP_NUMBER}?text={encoded_message}"
+
+    return redirect(whatsapp_url)
+
+
+# ---------------------------------------------------------------------------
+# 404
 # ---------------------------------------------------------------------------
 @app.errorhandler(404)
 def not_found(e):
@@ -431,7 +370,7 @@ def not_found(e):
 
 
 # ---------------------------------------------------------------------------
-# Entry point
+# Run
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
